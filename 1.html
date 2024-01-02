@@ -26,7 +26,7 @@
     let questionStack;
 
     function fetchDataAndStartQuiz() {
-      fetch('https://raw.githubusercontent.com/toppeak-web/programing/main/output.json')
+      fetch('https://raw.githubusercontent.com/toppeak-web/eng_word/main/db.json')
         .then(response => response.json())
         .then(data => {
           wordList = data; // JSON 파일 데이터를 변수에 할당
