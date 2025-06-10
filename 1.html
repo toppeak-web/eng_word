@@ -17,6 +17,11 @@
   <button onclick="fetchDataAndStartQuiz()" class="btn btn-primary mt-2 ms-2">시작하기</button><br><br>
   <p id="question" class="ms-2"></p>
   <input type="text" id="answer" placeholder="정답을 입력하세요" class="ms-2"><br><br>
+  <div class="form-check form-switch ms-2">
+    <input class="form-check-input" type="checkbox" role="switch" id="toggleMeaning" checked>
+    <label class="form-check-label" for="toggleMeaning">의미 대신 예문 보기</label>
+  </div>
+  
   <button onclick="checkAnswer()" class="btn btn-primary mt-2 ms-2">정답 확인</button><br><br>
   <div id="mistakes" class="ms-2 mt-3" style="display: none;"></div>
   <script>
@@ -37,11 +42,15 @@
     }
 
     function askQuestion() {
-      if (questionStack.length > 0) {
-        currentQuestion = questionStack.pop();
-        document.getElementById("question").innerHTML = `Question: ${currentQuestion['예문']}`;
+     if (questionStack.length > 0) {
+    currentQuestion = questionStack.pop();
+    
+    const useExample = document.getElementById("toggleMeaning").checked;
+    const questionText = useExample ? currentQuestion['예문'] : currentQuestion['의미'];
+
+    document.getElementById("question").innerHTML = `Question: ${questionText}`;
       } else {
-        showMistakes();
+    showMistakes();
       }
     }
     
@@ -53,18 +62,23 @@
     }
 
     function checkAnswer() {
-      const userInput = document.getElementById("answer").value.toLowerCase();
-      const correctAnswer = currentQuestion['의미'].toLowerCase();
+      const userInput = document.getElementById("answer").value.trim().toLowerCase();
+      const useExample = document.getElementById("toggleMeaning").checked;
 
-      if (userInput === correctAnswer) {
+     const correctAnswer = useExample
+       ? currentQuestion['단어'].toLowerCase()
+       : currentQuestion['의미'].toLowerCase();
+
+     if (userInput === correctAnswer) {
         alert("정답입니다!");
         askQuestion();
       } else {
-        alert(`틀렸습니다! 정답은 ${currentQuestion['의미']}입니다.`);
-        saveMistake();
-        askQuestion();
-      }
+        alert(`틀렸습니다! 정답은 ${correctAnswer} 입니다.`);
+       saveMistake();
+      askQuestion();
+     }
     }
+
 
     function saveMistake() {
       mistakeList.push(currentQuestion);
