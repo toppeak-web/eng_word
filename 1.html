@@ -41,19 +41,22 @@
         .catch(error => console.error('데이터를 불러오지 못했습니다.', error));
     }
 
-    function askQuestion() {
-     if (questionStack.length > 0) {
-    currentQuestion = questionStack.pop();
-    
-    const useExample = document.getElementById("toggleMeaning").checked;
-    const questionText = useExample ? currentQuestion['예문'] : currentQuestion['의미'];
+	function askQuestion() {
+	  if (questionStack.length > 0) {
+		currentQuestion = questionStack.pop();
+		
+		const useMeaningAsQuestion = document.getElementById("toggleMeaning").checked;
+		const questionText = useMeaningAsQuestion
+		  ? currentQuestion['의미']   // 영어단어가 문제
+		  : currentQuestion['예문']; // 한글뜻이 문제
 
-    document.getElementById("question").innerHTML = `Question: ${questionText}`;
-      } else {
-    showMistakes();
-      }
-    }
-    
+		document.getElementById("question").innerHTML = `문제: ${questionText}`;
+	  } else {
+		showMistakes();
+	  }
+	}
+
+	   
     function startQuiz() {
       const start = parseInt(document.getElementById("start").value);
       const end = parseInt(document.getElementById("end").value);
@@ -61,41 +64,46 @@
       askQuestion();
     }
 
-    function checkAnswer() {
-      const userInput = document.getElementById("answer").value.trim().toLowerCase();
-      const useExample = document.getElementById("toggleMeaning").checked;
+	function checkAnswer() {
+	  const userInput = document.getElementById("answer").value.trim().toLowerCase();
+	  const useMeaningAsQuestion = document.getElementById("toggleMeaning").checked;
+	  const correctAnswer = useMeaningAsQuestion
+		? currentQuestion['예문'].toLowerCase()  // 예문이 정답
+		: currentQuestion['의미'].toLowerCase(); // 의미(영단어)가 정답
 
-     const correctAnswer = useExample
-       ? currentQuestion['단어'].toLowerCase()
-       : currentQuestion['의미'].toLowerCase();
+	  if (userInput === correctAnswer) {
+		alert("정답입니다!");
+	  } else {
+		alert(`틀렸습니다! 정답은 ${correctAnswer} 입니다.`);
+		saveMistake();
+	  }
 
-     if (userInput === correctAnswer) {
-        alert("정답입니다!");
-        askQuestion();
-      } else {
-        alert(`틀렸습니다! 정답은 ${correctAnswer} 입니다.`);
-       saveMistake();
-      askQuestion();
-     }
-    }
+	  document.getElementById("answer").value = '';
+	  askQuestion();
+	}
+
 
 
     function saveMistake() {
       mistakeList.push(currentQuestion);
     }
 
-    function showMistakes() {
-      const mistakesDiv = document.getElementById('mistakes');
-      const unansweredMistakes = mistakeList.filter(item => !questionStack.includes(item));
-      if (unansweredMistakes && unansweredMistakes.length > 0) {
-        const mistakesHTML = unansweredMistakes.map(item => `<p>예문: ${item['예문']}<br>정답: ${item['의미']}</p>`).join('');
-        mistakesDiv.innerHTML = `<h2>오답 노트</h2>${mistakesHTML}`;
-        mistakesDiv.style.display = 'block';
-      } else {
-        mistakesDiv.innerHTML = "<h2>오답 노트</h2><p>오답이 없습니다.</p>";
-        mistakesDiv.style.display = 'block';
-      }
-    }
+	function showMistakes() {
+	  const useMeaningAsQuestion = document.getElementById("toggleMeaning").checked;
+	  const mistakesDiv = document.getElementById('mistakes');
+	  if (mistakeList.length > 0) {
+		const mistakesHTML = mistakeList.map(item => {
+		  const question = useMeaningAsQuestion ? item['의미'] : item['예문'];
+		  const answer = useMeaningAsQuestion ? item['예문'] : item['의미'];
+		  return `<p>문제: ${question}<br>정답: ${answer}</p>`;
+		}).join('');
+		mistakesDiv.innerHTML = `<h2>오답 노트</h2>${mistakesHTML}`;
+	  } else {
+		mistakesDiv.innerHTML = "<h2>오답 노트</h2><p>오답이 없습니다.</p>";
+	  }
+	  mistakesDiv.style.display = 'block';
+	}
+
 
     function shuffle(array) {
       let currentIndex = array.length, randomIndex;
